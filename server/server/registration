@@ -1,0 +1,42 @@
+var a = data{
+	companyName: "Train Central",
+	ownerName:   "Ram",
+	rollNo:      "1",
+	ownerEmail:  "ram@abc.edu",
+	accessCode:  "FKDLje",
+}
+
+js, err := json.Marshal(a)
+if err != nil {
+	fmt.Println("Error encoding:", err)
+	return
+}
+
+res, err := http.Post("http://20.244.56.144/train/register", "application/json", bytes.NewBuffer(js))
+if err != nil {
+	fmt.Println("Error making POST request:", err)
+	return
+}
+defer res.Body.Close()
+
+if res.StatusCode == http.StatusOK {
+
+	var response struct {
+		CompanyName  string `json:"companyName"`
+		ClientID     string `json:"clientID"`
+		ClientSecret string `json:"clientSecret"`
+	}
+
+	err := json.NewDecoder(res.Body).Decode(&response)
+	if err != nil {
+		fmt.Println("Error decoding response JSON:", err)
+		return
+	}
+	fmt.Println("Registration Successful!")
+	fmt.Println("Company Name:", response.CompanyName)
+	fmt.Println("Client ID:", response.ClientID)
+	fmt.Println("Client Secret:", response.ClientSecret)
+
+} else {
+	fmt.Println("Registration failed. Status Code:", res.StatusCode)
+}
